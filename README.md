@@ -43,6 +43,18 @@ Podcast episode
 
 パイプラインの内部工程は [`config/pipeline.yml`](config/pipeline.yml)、リポジトリ間の受け渡し契約は [`r2r.yaml`](r2r.yaml)、プロジェクト単位のデータ型と型変換の仕事は [`project.yaml`](project.yaml)、批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
 
+## Content Layer と Work System Layer
+
+実践上の混線を避けるため、まずこのプロジェクトを二層に分けます。**Content Layer** は、何を調べ、何を論じ、何を公開するかを扱います。第1回の主題曲、raw research、楽曲分析、批評台本、引用、音声がこちらです。**Work System Layer** は、そのContentを誰が、どのskill・toolで、どの順序とgateを通して作るかを扱います。agent定義、task契約、Workflow、provenance、human reviewがこちらです。
+
+| Layer | 問い | 現在の正本 |
+|---|---|---|
+| **Content Layer** | 何を扱い、何を語り、何を公開するか | [`content/content.yaml`](content/content.yaml)、`podcast/`、`research/`、`prompts/` |
+| **Work System Layer** | 誰が、どのskill/toolで、どの順に仕事をするか | [`work-system/work-system.yaml`](work-system/work-system.yaml)、`.github/agents/`、[`config/pipeline.yml`](config/pipeline.yml) |
+| **Composition** | このプロジェクトで両層をどう接続するか | [`layers.yaml`](layers.yaml)、[`project.yaml`](project.yaml)、[`r2r.yaml`](r2r.yaml) |
+
+現段階では、既存のroot `project.yaml`、`ontology.yaml`、`ontology.ttl`を壊さずに互換維持します。`content/`と`work-system/`は新しい責務別の入口であり、同じデータや変換を別コピーとして管理しません。将来、Work System Layerを別プロジェクトへ移すときは、idol固有のSpotify・idol-db・批評プロンプトをadapterとして差し替えます。
+
 ## 4層オントロジー
 
 似て見える4つを、対象の違いで分離します。正式な語彙とインスタンスは [`ontology.yaml`](ontology.yaml)、RDFとしての表現は [`ontology.ttl`](ontology.ttl) にあります。

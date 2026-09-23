@@ -1,0 +1,38 @@
+version: 1
+kind: layer-manifest
+project: idol-podcast
+
+layers:
+  content:
+    definition: content/content.yaml
+    question: "何を扱い、何を語り、何を公開するか"
+    canonical_paths:
+      - podcast/
+      - research/raw/
+      - prompts/critique-script.md
+  work_system:
+    definition: work-system/work-system.yaml
+    question: "誰が、どのskill/toolで、どの順に、どのgateを通って仕事をするか"
+    canonical_paths:
+      - .github/agents/
+      - config/pipeline.yml
+      - r2r.yaml
+      - ontology.yaml
+      - ontology.ttl
+
+compatibility:
+  current_root_contract: project.yaml
+  rule: >-
+    移行期間中はroot project.yamlを既存のtyped data contractとして保持する。
+    content/content.yamlとwork-system/work-system.yamlは責務別の入口であり、同じ型や変換を複製しない。
+  future_migration:
+    - move content data types and episode contracts into content/
+    - move generic transformations and workflow contracts into work-system/
+    - retain project.yaml as a thin composition manifest
+
+boundary_rules:
+  - content_does_not_define_runtime
+  - work_system_does_not_define_editorial_meaning
+  - every_cross_layer_edge_is_typed
+  - raw_research_is_content_input_not_workflow_state
+  - human_editorial_review_is_a_work_system_gate_over_content

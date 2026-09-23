@@ -6,6 +6,12 @@ purpose: >-
   各プロジェクトは input type を受け取り、検証可能な output type を生成する。
   repo間の受け渡しは r2r.yaml、実行順は config/pipeline.yml が参照する。
 
+layers:
+  composition: layers.yaml
+  content: content/content.yaml
+  work_system: work-system/work-system.yaml
+  migration_status: practical-separation-before-generalization
+
 conventions:
   type_id_format: "domain.entity.version"
   every_type_requires:

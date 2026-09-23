@@ -26,6 +26,8 @@ ip:Skill a rdfs:Class ; rdfs:comment "再利用可能な仕事の方法"@ja .
 ip:Tool a rdfs:Class ; rdfs:comment "workflow taskから呼び出される実行能力"@ja .
 ip:Plan a rdfs:Class ; rdfs:comment "成果とマイルストーンを持つ計画"@ja .
 ip:Task a rdfs:Class ; rdfs:comment "skillとtoolに束縛された実行単位"@ja .
+ip:ContentLayer a rdfs:Class ; rdfs:comment "研究・出典・台本・音声などの内容層"@ja .
+ip:WorkSystemLayer a rdfs:Class ; rdfs:comment "agent・skill・tool・workflow・gateの仕事システム層"@ja .
 
 ip:contains a rdfs:Property ; rdfs:domain ip:Topology ; rdfs:range ip:Node .
 ip:exposes a rdfs:Property ; rdfs:domain ip:Repository ; rdfs:range ip:Port .
@@ -52,6 +54,7 @@ ip:performs a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:TypeTransform
 ip:usesSkill a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:Skill .
 ip:invokes a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Tool .
 ip:requiresSkill a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Skill .
+ip:operatesOn a rdfs:Property ; rdfs:domain ip:WorkSystemLayer ; rdfs:range ip:ContentLayer .
 ip:conformsTo a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:Agent .
 ip:plannedBy a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:Agent .
 
@@ -85,6 +88,8 @@ ip:DecomposePlan a ip:TypeTransformation ; ip:transforms ip:WorkflowTaskSet .
 ip:ProducerAgentArchitype a ip:Agent ; rdfs:label "bonsai/producer-agent architype" .
 ip:IdolPAgent a ip:Agent ; rdfs:label "bonsai/idol-p-agent practical type" ; ip:conformsTo ip:ProducerAgentArchitype .
 ip:IdolPodcastProject ip:plannedBy ip:IdolPAgent .
+ip:IdolPodcastContent a ip:ContentLayer ; rdfs:label "idol-podcast Content Layer" ; ip:hasDefinition "content/content.yaml" .
+ip:IdolPodcastWorkSystem a ip:WorkSystemLayer ; rdfs:label "idol-podcast Work System Layer" ; ip:operatesOn ip:IdolPodcastContent ; ip:hasDefinition "work-system/work-system.yaml" .
 ip:Canonicalize a ip:TypeTransformation ; ip:transforms ip:CanonicalRecordSet .
 ip:Analyze a ip:TypeTransformation ; ip:transforms ip:AnalysisPacket .
 ip:WriteCritique a ip:TypeTransformation ; ip:transforms ip:ApprovedScript .

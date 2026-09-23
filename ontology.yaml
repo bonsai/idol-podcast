@@ -137,6 +137,10 @@ classes:
     description: producer-authored intended sequence of outcomes and milestones
   Task:
     description: executable unit derived from a plan and bound to skill and tool
+  ContentLayer:
+    description: episode material, research, evidence, editorial text, and published media
+  WorkSystemLayer:
+    description: agents, skills, tools, workflows, task contracts, and gates
 
 relations:
   - subject: Repository
@@ -223,6 +227,9 @@ relations:
   - subject: Plan
     predicate: decomposes_into
     object: Task
+  - subject: WorkSystemLayer
+    predicate: operates_on
+    object: ContentLayer
 
 boundary_rules:
   - id: topology-is-not-workflow
@@ -251,6 +258,10 @@ boundary_rules:
     rule: every producer task declares at least one skill, one tool, an owner, inputs, outputs, and done condition
   - id: architype-is-not-project
     rule: an architype defines reusable producer semantics; a practical type applies them to a domain; a project owns concrete outputs
+  - id: content-is-not-runtime
+    rule: content defines meaning and evidence; work system defines execution and must not invent editorial meaning
+  - id: runtime-is-portable
+    rule: work system components should be reusable when content-specific adapters are replaced
 
 instances:
   topology:
@@ -339,3 +350,12 @@ instances:
       id: idol-podcast
       repository: bonsai/idol-podcast
       planned_by: idol-p-agent
+
+  layers:
+    content:
+      definition: content/content.yaml
+    work_system:
+      definition: work-system/work-system.yaml
+      operates_on: content
+    composition:
+      definition: layers.yaml

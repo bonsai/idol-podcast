@@ -1,0 +1,97 @@
+version: 1
+kind: work-system-layer
+name: idol-podcast-work-system
+purpose: >-
+  Contentを入力として受け取り、agent、skill、tool、workflow、gateを組み合わせて
+  再現可能な仕事へ変換する。将来は他ドメインへ移植できるよう、Content固有語彙を境界に置く。
+
+work_system_boundary:
+  owns:
+    - agent_roles
+    - skills
+    - tool_bindings
+    - workflow_stages
+    - task_contracts
+    - gates
+    - retries_and_failures
+    - provenance_requirements
+    - human_review_boundaries
+  does_not_own:
+    - episode_theme
+    - artist_interpretation
+    - editorial_thesis
+    - source_content_meaning
+    - published_content_copy
+
+instance:
+  domain: idol-podcast
+  content_layer: ../content/content.yaml
+  current_workflow: ../config/pipeline.yml
+  typed_project_contract: ../project.yaml
+
+agents:
+  - id: metadata-collection-agent
+    role: collect-and-normalize
+    input_contract: external.track-reference.v1
+    output_contract: metadata.track-metadata.v1
+  - id: song-analysis-agent
+    role: evidence-bounded-analysis
+    input_contracts:
+      - metadata.track-metadata.v1
+      - audio.authorized-listening-notes.v1
+      - playlist.observation.v1
+    output_contract: analysis.song-analysis.v1
+  - id: idol-p-agent
+    role: practical-producer
+    architype: bonsai/producer-agent
+  - id: human-editor
+    role: editorial-gate
+
+skills:
+  - metadata-extraction
+  - provenance-capture
+  - song-analysis
+  - evidence-bounded-critique
+  - uncertainty-labeling
+  - concept-design
+  - project-planning
+  - workflow-decomposition
+  - acceptance-criteria-design
+
+workflow:
+  definition: ../config/pipeline.yml
+  sequence:
+    - collect_track_metadata
+    - analyze_song
+    - select
+    - analyze
+    - market_research
+    - producer_plan
+    - write
+    - human_editorial_review
+    - generate_audio
+  rule: workflow operates on typed artifacts; it does not define their cultural meaning
+
+task_contract:
+  required:
+    - id
+    - skill
+    - tools
+    - inputs
+    - outputs
+    - owner
+    - done_when
+
+portability:
+  reusable_parts:
+    - agents
+    - skills
+    - task_contract
+    - workflow_stage_shape
+    - gates
+    - provenance_rules
+  idol_specific_bindings:
+    - spotify-public-metadata
+    - idol-db-ranker
+    - idol-playlist-ranking
+    - prompts/critique-script.md

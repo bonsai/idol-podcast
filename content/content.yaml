@@ -1,0 +1,60 @@
+version: 1
+kind: content-layer
+name: idol-podcast-content
+purpose: >-
+  アイドル批評Podcastで扱う作品、研究成果、出典、台本、音声成果物を管理する。
+
+content_boundary:
+  owns:
+    - episode_topics
+    - research_observations
+    - selected_evidence
+    - song_metadata
+    - song_analysis
+    - critique_scripts
+    - show_notes
+    - citations
+    - audio_outputs
+  does_not_own:
+    - agent_runtime
+    - workflow_execution_order
+    - retry_policy
+    - tool_credentials
+    - generic_task_orchestration
+
+source_of_truth:
+  episode_scripts: podcast/talkscript/
+  research_material: research/raw/
+  editorial_prompt: prompts/critique-script.md
+  typed_contract_reference: project.yaml
+
+episode_001:
+  id: episode-001
+  title: "ランキングに載っていない曲を、どう聴き、どう記録するか"
+  subject:
+    title: "秘密の扉"
+    artist: "惑星通信社"
+    provider: spotify
+    track_id: 4QTGIIFqhOOdwJeKca7okQ
+  inputs:
+    - research/raw/001-metadata.track-metadata.v1.json
+    - research/raw/001-analysis.song-analysis.v1.json
+    - research/raw/001-research-summary.md
+  outputs:
+    script: podcast/talkscript/001.md
+  status: research-draft
+  editorial_gates:
+    - facts_are_traceable
+    - facts_interpretations_hypotheses_are_separate
+    - missing_audio_or_lyrics_are_disclosed
+    - human_review_before_audio
+
+content_types:
+  - metadata.track-metadata.v1
+  - analysis.song-analysis.v1
+  - research.analysis-packet.v1
+  - editorial.episode-brief.v1
+  - editorial.approved-script.v1
+  - editorial.show-notes.v1
+  - editorial.citation-manifest.v1
+  - audio.podcast-episode.v1
