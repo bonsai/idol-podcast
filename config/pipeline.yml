@@ -1,0 +1,75 @@
+version: 1
+name: idol-critique-podcast
+purpose: >-
+  idol-db と idol-research から根拠のある論点を選抜し、批評テキストへ編集して、
+  podcast-generator に音声化を依頼する。
+
+stages:
+  - id: select
+    owner: idol-db
+    inputs:
+      - canonical_data
+      - provenance
+      - observation_timestamp
+    outputs:
+      - selected_evidence.json
+    rules:
+      - source_url is required for every material fact
+      - retrieved_at or accessed_at is required
+      - private or unlicensed content is excluded
+      - selection must expose missing_data and known_biases
+
+  - id: analyze
+    owner: idol-research
+    inputs:
+      - selected_evidence.json
+      - research_question
+      - comparison_context
+    outputs:
+      - analysis_packet.json
+    rules:
+      - keep fact, inference, and hypothesis in separate fields
+      - do not generalize from one case without a comparison plan
+      - include at least one counter_hypothesis
+      - include confidence and next_validation
+
+  - id: write
+    owner: idol-podcast
+    inputs:
+      - selected_evidence.json
+      - analysis_packet.json
+      - prompts/critique-script.md
+    outputs:
+      - artifacts/episode-brief.md
+      - artifacts/episode-script.md
+      - artifacts/show-notes.md
+      - artifacts/citations.json
+    rules:
+      - distinguish observation from interpretation in the script
+      - quote or paraphrase only traceable material
+      - disclose uncertainty, sponsorship, and conflicts of interest
+      - include an editorial review gate before audio generation
+
+  - id: generate_audio
+    owner: podcast-generator
+    inputs:
+      - artifacts/episode-script.md
+    outputs:
+      - audio/episode.mp3
+      - audio/transcript.vtt
+    command: ${PODCAST_GENERATOR_COMMAND:-podcast-generator}
+    rules:
+      - generator is an adapter, not the source of truth
+      - retain the text script and citations next to the audio
+      - fail closed when the generator command is unavailable
+
+contracts:
+  evidence_required: [source, source_url, accessed_at, retrieved_at]
+  analysis_required: [facts, inferences, hypotheses, counter_hypothesis, confidence, next_validation]
+  editorial_required: [central_question, structure, sensitivity_notes, citations]
+  audio_required: [script_sha256, generated_at, voice_config, duration_seconds]
+
+review:
+  required_before_audio: true
+  reviewer: human
+  public_release: manual
