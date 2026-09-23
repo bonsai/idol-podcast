@@ -33,7 +33,7 @@ Podcast episode
 
 ## 実行契約
 
-パイプラインの正式な定義は [`config/pipeline.yml`](config/pipeline.yml) にあります。批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
+パイプラインの内部工程は [`config/pipeline.yml`](config/pipeline.yml)、リポジトリ間の受け渡し契約は [`r2r.yaml`](r2r.yaml)、批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
 
 入力は次のフィールドを持つことを前提にします。
 

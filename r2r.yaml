@@ -1,0 +1,151 @@
+version: 1
+kind: repository-to-repository
+name: idol-critique-podcast-r2r
+
+purpose: >-
+  idol-db のcanonical public dataと idol-research の検証済み分析を
+  idol-podcast の批評台本へ変換し、承認後に podcast-generator へ渡す。
+
+repositories:
+  sources:
+    - id: idol-db
+      repository: bonsai/idol-db
+      role: canonical-data
+      read:
+        - data/
+        - schema/
+        - api/
+        - docs/
+      required_metadata:
+        - source
+        - source_url
+        - accessed_at
+        - retrieved_at
+        - license
+
+    - id: idol-research
+      repository: bonsai/idol-research
+      role: research-and-analysis
+      read:
+        - analysis/
+        - cases/
+        - data/
+        - research/
+        - schemas/
+      required_outputs:
+        - facts
+        - inferences
+        - hypotheses
+        - counter_hypothesis
+        - confidence
+        - next_validation
+
+  target:
+    - id: idol-podcast
+      repository: bonsai/idol-podcast
+      role: editorial-and-script-generation
+      write:
+        - artifacts/selected_evidence.json
+        - artifacts/analysis_packet.json
+        - artifacts/episode-brief.md
+        - artifacts/episode-script.md
+        - artifacts/show-notes.md
+        - artifacts/citations.json
+
+  downstream:
+    - id: podcast-generator
+      role: audio-generation-adapter
+      command: ${PODCAST_GENERATOR_COMMAND:-podcast-generator}
+      read:
+        - artifacts/episode-script.md
+      write:
+        - audio/episode.mp3
+        - audio/transcript.vtt
+        - audio/generation.json
+
+flow:
+  - id: select-evidence
+    from: [idol-db]
+    to: idol-podcast
+    operation: select
+    input: canonical public data with provenance
+    output: artifacts/selected_evidence.json
+    constraints:
+      - exclude private data
+      - exclude unlicensed material
+      - preserve source_url and retrieval time
+      - record missing_data and known_biases
+
+  - id: attach-analysis
+    from: [idol-research]
+    to: idol-podcast
+    operation: import
+    input: validated analysis packet
+    output: artifacts/analysis_packet.json
+    constraints:
+      - preserve fact-inference-hypothesis boundaries
+      - preserve counter_hypothesis
+      - preserve confidence and next_validation
+      - do not generalize from a single case without comparison context
+
+  - id: write-critique
+    from: [idol-podcast]
+    to: [idol-podcast]
+    operation: generate-editorial-text
+    input:
+      - artifacts/selected_evidence.json
+      - artifacts/analysis_packet.json
+      - prompts/critique-script.md
+    output:
+      - artifacts/episode-brief.md
+      - artifacts/episode-script.md
+      - artifacts/show-notes.md
+      - artifacts/citations.json
+    gate:
+      required: true
+      type: human-editorial-review
+
+  - id: generate-audio
+    from: [idol-podcast]
+    to: [podcast-generator]
+    operation: generate-audio
+    input: artifacts/episode-script.md
+    output:
+      - audio/episode.mp3
+      - audio/transcript.vtt
+      - audio/generation.json
+    gate:
+      required: true
+      type: approved-script
+    fail_if:
+      - command_not_found
+      - script_not_approved
+      - citation_manifest_missing
+
+artifacts:
+  episode_id: "idol-critique-${DATE}-${SLUG}"
+  manifest: artifacts/manifest.json
+  retention:
+    keep_text_and_citations: true
+    keep_raw_private_content: false
+  provenance:
+    required_for_publication: true
+    fields: [source, source_url, accessed_at, retrieved_at, license]
+
+security:
+  public_target_repository: true
+  private_source_policy: metadata-only
+  redact:
+    - credentials
+    - tokens
+    - personal_information
+    - unpublished_private_content
+
+release:
+  audio_generation: manual-after-review
+  publication: manual
+  required_checks:
+    - script_hash_recorded
+    - citations_present
+    - uncertainty_disclosed
+    - counter_hypothesis_present
