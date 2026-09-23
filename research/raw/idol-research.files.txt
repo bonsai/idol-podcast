@@ -1,0 +1,17 @@
+.github/workflows/aw-research.yml
+README.md
+analysis/README.md
+aw/research.yaml
+cases/amaterasu-x-planets-tsushinsha/README.md
+cases/terasuma/README.md
+data-hierarchy.yaml
+data/events.json
+docs/migration-from-idol-lab.md
+research-plan.md
+research-seeds/idol-db-seed.md
+research/README.md
+schemas/evaluation.schema.json
+schemas/evidence.schema.json
+schemas/hypothesis.schema.json
+schemas/observation.schema.json
+tools.yaml
