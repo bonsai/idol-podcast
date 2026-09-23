@@ -99,7 +99,7 @@ projects:
       - research_recommendation_is_actionable
 
   - id: idol-producer-agent
-    repository: agent-runtime
+    repository: bonsai/producer-agent
     role: producer-planning
     purpose: marketing researchを企画・実行計画・workflow taskへ変換する
     inputs:
