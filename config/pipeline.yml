@@ -33,6 +33,39 @@ stages:
       - include at least one counter_hypothesis
       - include confidence and next_validation
 
+  - id: market_research
+    owner: idol-marketing-agent
+    inputs:
+      - canonical_data
+      - analysis_packet.json
+      - marketing_question
+    outputs:
+      - marketing_research_packet.json
+    work:
+      skills: [market-research, audience-segmentation, opportunity-analysis]
+      tools: [gh, data-analysis, evidence-browser]
+    rules:
+      - cite market signals and separate evidence from assumptions
+      - include opportunity, risk, confidence, and recommendation
+
+  - id: producer_plan
+    owner: idol-producer-agent
+    inputs:
+      - marketing_research_packet.json
+      - producer_constraints
+      - aw_intent
+    outputs:
+      - project_concept.md
+      - execution_plan.yaml
+      - workflow_tasks.yaml
+    work:
+      skills: [concept-design, project-planning, workflow-decomposition, acceptance-criteria-design]
+      tools: [project-yaml-editor, issue-tracker, dependency-map]
+    rules:
+      - trace the plan to marketing research
+      - every task has skill, tool, owner, inputs, outputs, and done_when
+      - make dependencies, risks, and non-goals explicit
+
   - id: write
     owner: idol-podcast
     inputs:

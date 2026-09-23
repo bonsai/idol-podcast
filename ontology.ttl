@@ -21,6 +21,11 @@ ip:Provenance a rdfs:Class .
 ip:Project a rdfs:Class ; rdfs:comment "入力型を出力型へ変換する責務単位"@ja .
 ip:DataType a rdfs:Class ; rdfs:comment "プロジェクト間を流れるversioned data contract"@ja .
 ip:TypeTransformation a rdfs:Class ; rdfs:comment "型変換として記録された具体的な仕事"@ja .
+ip:Agent a rdfs:Class ; rdfs:comment "変換を実行する主体"@ja .
+ip:Skill a rdfs:Class ; rdfs:comment "再利用可能な仕事の方法"@ja .
+ip:Tool a rdfs:Class ; rdfs:comment "workflow taskから呼び出される実行能力"@ja .
+ip:Plan a rdfs:Class ; rdfs:comment "成果とマイルストーンを持つ計画"@ja .
+ip:Task a rdfs:Class ; rdfs:comment "skillとtoolに束縛された実行単位"@ja .
 
 ip:contains a rdfs:Property ; rdfs:domain ip:Topology ; rdfs:range ip:Node .
 ip:exposes a rdfs:Property ; rdfs:domain ip:Repository ; rdfs:range ip:Port .
@@ -43,6 +48,10 @@ ip:accepts a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:DataType .
 ip:emits a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:DataType .
 ip:transforms a rdfs:Property ; rdfs:domain ip:TypeTransformation ; rdfs:range ip:DataType .
 ip:validatedBy a rdfs:Property ; rdfs:domain ip:TypeTransformation ; rdfs:range ip:Gate .
+ip:performs a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:TypeTransformation .
+ip:usesSkill a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:Skill .
+ip:invokes a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Tool .
+ip:requiresSkill a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Skill .
 
 ip:IdolDb a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-db" .
 ip:IdolResearch a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-research" .
@@ -62,6 +71,15 @@ ip:CanonicalRecordSet a ip:DataType ; rdfs:label "canonical.idol-record-set.v1" 
 ip:AnalysisPacket a ip:DataType ; rdfs:label "research.analysis-packet.v1" .
 ip:ApprovedScript a ip:DataType ; rdfs:label "editorial.approved-script.v1" .
 ip:AudioEpisodeType a ip:DataType ; rdfs:label "audio.podcast-episode.v1" .
+ip:MarketingResearchPacket a ip:DataType ; rdfs:label "marketing.research-packet.v1" .
+ip:ProducerProjectConcept a ip:DataType ; rdfs:label "producer.project-concept.v1" .
+ip:ProducerExecutionPlan a ip:DataType ; rdfs:label "producer.execution-plan.v1" .
+ip:WorkflowTaskSet a ip:DataType ; rdfs:label "workflow.task-set.v1" .
+ip:MarketingAgent a ip:Agent ; rdfs:label "idol-marketing-agent" ; ip:performs ip:MarketingResearch .
+ip:ProducerAgent a ip:Agent ; rdfs:label "idol-producer-agent" ; ip:performs ip:PlanProject .
+ip:MarketingResearch a ip:TypeTransformation ; ip:transforms ip:MarketingResearchPacket .
+ip:PlanProject a ip:TypeTransformation ; ip:transforms ip:ProducerExecutionPlan .
+ip:DecomposePlan a ip:TypeTransformation ; ip:transforms ip:WorkflowTaskSet .
 ip:Canonicalize a ip:TypeTransformation ; ip:transforms ip:CanonicalRecordSet .
 ip:Analyze a ip:TypeTransformation ; ip:transforms ip:AnalysisPacket .
 ip:WriteCritique a ip:TypeTransformation ; ip:transforms ip:ApprovedScript .

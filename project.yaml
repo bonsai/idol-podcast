@@ -70,6 +70,66 @@ projects:
       - counter_hypothesis_is_present
       - confidence_and_next_validation_are_present
 
+  - id: idol-marketing-agent
+    repository: agent-runtime
+    role: marketing-research
+    purpose: research成果とcanonical dataを市場・対象・機会の調査パケットへ変換する
+    inputs:
+      - canonical.idol-record-set.v1
+      - canonical.event-record-set.v1
+      - research.analysis-packet.v1
+      - marketing.question.v1
+    outputs:
+      - marketing.research-packet.v1
+    transformations:
+      - analysis-to-marketing-research
+    work:
+      skills:
+        - market-research
+        - audience-segmentation
+        - opportunity-analysis
+      tools:
+        - gh
+        - data-analysis
+        - evidence-browser
+    acceptance:
+      - market_signals_are_cited
+      - audience_and_need_are_separated_from_assumption
+      - opportunity_has_confidence_and_risk
+      - research_recommendation_is_actionable
+
+  - id: idol-producer-agent
+    repository: agent-runtime
+    role: producer-planning
+    purpose: marketing researchを企画・実行計画・workflow taskへ変換する
+    inputs:
+      - marketing.research-packet.v1
+      - producer.constraints.v1
+      - aw.intent.v1
+    outputs:
+      - producer.project-concept.v1
+      - producer.execution-plan.v1
+      - workflow.task-set.v1
+    transformations:
+      - marketing-research-to-project-concept
+      - project-concept-to-execution-plan
+      - execution-plan-to-workflow-tasks
+    work:
+      skills:
+        - concept-design
+        - project-planning
+        - workflow-decomposition
+        - acceptance-criteria-design
+      tools:
+        - project-yaml-editor
+        - issue-tracker
+        - dependency-map
+    acceptance:
+      - plan_is_traceable_to_marketing_research
+      - concept_has_target_outcome_and_scope
+      - tasks_have_skill_tool_owner_and_done_condition
+      - dependencies_and_risks_are_explicit
+
   - id: idol-podcast
     repository: bonsai/idol-podcast
     role: editorial-language
@@ -172,6 +232,49 @@ types:
     owner_project: idol-research
 
   - id: editorial.format-spec.v1
+  - id: marketing.question.v1
+    media: yaml
+    schema: '{market_question, target, geography?, period?, decision_needed}'
+    provenance: optional
+    owner_project: idol-marketing-agent
+
+  - id: marketing.research-packet.v1
+    media: json
+    schema: '{market_signals[], audience_segments[], needs[], opportunities[], risks[], confidence, citations[]}'
+    provenance: required
+    owner_project: idol-marketing-agent
+
+  - id: producer.constraints.v1
+    media: yaml
+    schema: '{budget?, timebox?, capabilities[], exclusions[], success_metrics[]}'
+    provenance: optional
+    owner_project: idol-producer-agent
+
+  - id: aw.intent.v1
+    media: yaml
+    schema: '{intent, desired_outcomes[], actors[], acceptance_criteria[]}'
+    provenance: optional
+    owner_project: idol-producer-agent
+
+  - id: producer.project-concept.v1
+    media: markdown
+    schema: 'problem, audience, value_proposition, concept, scope, non_goals, risks'
+    provenance: required
+    owner_project: idol-producer-agent
+
+  - id: producer.execution-plan.v1
+    media: yaml
+    schema: '{outcomes[], milestones[], dependencies[], resources[], metrics[], risks[], decision_log[]}'
+    provenance: required
+    owner_project: idol-producer-agent
+
+  - id: workflow.task-set.v1
+    media: yaml
+    schema: '{tasks[{id, skill, tools[], inputs[], outputs[], owner, done_when}], gates[], order[]}'
+    provenance: required
+    owner_project: idol-producer-agent
+
+  - id: editorial.format-spec.v1
     media: yaml
     schema: '{duration_target, sections[], tone, prohibited_content[]}'
     provenance: optional
@@ -226,6 +329,42 @@ types:
     owner_project: podcast-generator
 
 transformations:
+  - id: analysis-to-marketing-research
+    from: [canonical.idol-record-set.v1, canonical.event-record-set.v1, research.analysis-packet.v1, marketing.question.v1]
+    to: marketing.research-packet.v1
+    owner_project: idol-marketing-agent
+    work: market research, audience segmentation, opportunity analysis, evidence synthesis
+    skills: [market-research, audience-segmentation, opportunity-analysis]
+    tools: [gh, data-analysis, evidence-browser]
+    validation: marketing-evidence-and-confidence-check
+
+  - id: marketing-research-to-project-concept
+    from: marketing.research-packet.v1
+    to: producer.project-concept.v1
+    owner_project: idol-producer-agent
+    work: frame problem, define audience, state value proposition, set scope and non-goals
+    skills: [concept-design]
+    tools: [project-yaml-editor, evidence-browser]
+    validation: concept-traceability-review
+
+  - id: project-concept-to-execution-plan
+    from: [producer.project-concept.v1, producer.constraints.v1, aw.intent.v1]
+    to: producer.execution-plan.v1
+    owner_project: idol-producer-agent
+    work: define milestones, dependencies, resources, metrics, risks, and decisions
+    skills: [project-planning, acceptance-criteria-design]
+    tools: [project-yaml-editor, dependency-map]
+    validation: plan-feasibility-review
+
+  - id: execution-plan-to-workflow-tasks
+    from: producer.execution-plan.v1
+    to: workflow.task-set.v1
+    owner_project: idol-producer-agent
+    work: decompose plan into tasks with skill, tool, input, output, owner, and done condition
+    skills: [workflow-decomposition]
+    tools: [project-yaml-editor, issue-tracker, dependency-map]
+    validation: task-completeness-and-dependency-check
+
   - id: public-record-to-canonical-record
     from: public.source-record.v1
     to: canonical.idol-record-set.v1

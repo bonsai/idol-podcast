@@ -127,6 +127,16 @@ classes:
     description: versioned shape and media contract flowing between projects
   TypeTransformation:
     description: named work that converts input data types into output data types
+  Agent:
+    description: actor that performs a project transformation
+  Skill:
+    description: reusable method or competence used by an agent
+  Tool:
+    description: executable capability invoked by a workflow task
+  Plan:
+    description: producer-authored intended sequence of outcomes and milestones
+  Task:
+    description: executable unit derived from a plan and bound to skill and tool
 
 relations:
   - subject: Repository
@@ -198,6 +208,21 @@ relations:
   - subject: TypeTransformation
     predicate: validated_by
     object: Gate
+  - subject: Agent
+    predicate: performs
+    object: TypeTransformation
+  - subject: Agent
+    predicate: uses_skill
+    object: Skill
+  - subject: Task
+    predicate: invokes
+    object: Tool
+  - subject: Task
+    predicate: requires_skill
+    object: Skill
+  - subject: Plan
+    predicate: decomposes_into
+    object: Task
 
 boundary_rules:
   - id: topology-is-not-workflow
@@ -218,6 +243,12 @@ boundary_rules:
     rule: a type edge is not complete until its normalization, analysis, writing, or generation work is named
   - id: typed-r2r
     rule: every R2R artifact must reference a versioned DataType and a producing TypeTransformation
+  - id: research-before-production
+    rule: producer planning consumes a marketing research packet and must not invent market evidence
+  - id: producer-is-not-marketer
+    rule: marketing agent researches signals; producer agent chooses concept, plan, and execution decomposition
+  - id: task-is-skill-and-tool-bound
+    rule: every producer task declares at least one skill, one tool, an owner, inputs, outputs, and done condition
 
 instances:
   topology:
@@ -229,11 +260,16 @@ instances:
       - podcast-generator
       - human-editor
       - public-data-sources
+      - idol-marketing-agent
+      - idol-producer-agent
     edges:
       - [public-data-sources, idol-db]
       - [idol-db, idol-research]
       - [idol-db, idol-podcast]
       - [idol-research, idol-podcast]
+      - [idol-research, idol-marketing-agent]
+      - [idol-marketing-agent, idol-producer-agent]
+      - [idol-producer-agent, idol-podcast]
       - [idol-podcast, human-editor]
       - [idol-podcast, podcast-generator]
 

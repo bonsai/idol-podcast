@@ -13,6 +13,12 @@ idol-db
 idol-research
   observation / comparison / hypothesis / validation
         ↓ analysis packet
+idol-marketing-agent
+  market research / audience / opportunity
+        ↓ marketing research packet
+idol-producer-agent
+  concept / plan / workflow tasks
+        ↓ execution plan + task set
 idol-podcast
   critique framing / script / show notes / citations
         ↓ human editorial review
@@ -28,6 +34,8 @@ Podcast episode
 |---|---|---|
 | `idol-db` | 公開情報の取得・正規化・出典管理 | canonical data、source URL、取得日時 |
 | `idol-research` | 観測、比較、仮説、評価、次の検証設計 | analysis packet |
+| `idol-marketing-agent` | researchを市場・対象・機会の調査へ変換 | marketing research packet |
+| `idol-producer-agent` | marketing researchを企画・計画・workflow taskへ変換 | project concept、execution plan、task set |
 | `idol-podcast` | 選抜論点の批評構成、言語化、出典・注意点の整理 | 台本、概要欄、引用一覧 |
 | `podcast-generator` | 承認済みテキストの音声化 | 音声、字幕、生成メタデータ |
 
@@ -63,6 +71,24 @@ Project flow:  A型 ──[normalize]──> B型 ──[analyze]──> C型 �
 ```
 
 したがって、schemaを各型の静的な契約、`project.yaml` を型変換の仕事と時間軸を持つ動的な契約として併用します。`r2r.yaml` はこの流れのうちrepo境界をまたぐ受け渡しだけを定義し、`config/pipeline.yml` は実行順とgateを定義します。
+
+### Producer agent
+
+プロデューサーエージェントはマーケティングエージェントの代わりに市場を調査するものではありません。`marketing.research-packet.v1` を受け取り、そこから企画の対象・価値・スコープを決め、実行計画へ落とし、最後に各作業を **skill・tool・owner・input・output・done condition** 付きのworkflow taskへ分解します。つまり、仕事の流れは次の順です。
+
+```text
+marketing-agent
+  research → marketing.research-packet.v1
+        ↓
+producer-agent
+  concept → producer.project-concept.v1
+  plan    → producer.execution-plan.v1
+  tasks   → workflow.task-set.v1
+        ↓
+workflow engine / project execution
+```
+
+この責務境界により、マーケティングエージェントは「何が起きているかを調べる人」、プロデューサーエージェントは「何をやるかを決め、実行可能な仕事へ変換する人」となります。詳細な型・変換・skill・toolは [`project.yaml`](project.yaml) を正とします。
 
 入力は次のフィールドを持つことを前提にします。
 
