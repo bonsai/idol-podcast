@@ -70,6 +70,47 @@ projects:
       - counter_hypothesis_is_present
       - confidence_and_next_validation_are_present
 
+  - id: metadata-collection-agent
+    repository: bonsai/idol-podcast
+    role: track-metadata-collection
+    purpose: 外部トラック参照を出典付きの標準メタデータへ変換する
+    inputs:
+      - external.track-reference.v1
+    outputs:
+      - metadata.track-metadata.v1
+    transformations:
+      - track-reference-to-metadata
+    work:
+      skills: [metadata-extraction, provenance-capture]
+      tools: [spotify-public-metadata, gh]
+    acceptance:
+      - title_artist_track_id_are_captured
+      - release_date_and_duration_are_captured_when_available
+      - source_url_and_retrieved_at_are_present
+      - session_credentials_are_not_persisted
+
+  - id: song-analysis-agent
+    repository: bonsai/idol-podcast
+    role: evidence-bounded-song-analysis
+    purpose: メタデータ・許可された音源情報・ランキング観測を、断定可能範囲の楽曲分析へ変換する
+    inputs:
+      - metadata.track-metadata.v1
+      - audio.authorized-listening-notes.v1
+      - playlist.observation.v1
+      - research.analysis-packet.v1
+    outputs:
+      - analysis.song-analysis.v1
+    transformations:
+      - metadata-and-observations-to-song-analysis
+    work:
+      skills: [song-analysis, evidence-bounded-critique, uncertainty-labeling]
+      tools: [idol-db-ranker, idol-playlist-ranking, citation-checker]
+    acceptance:
+      - facts_and_interpretations_are_separate
+      - missing_audio_or_lyrics_is_explicit
+      - no_score_is_fabricated
+      - next_validation_is_defined
+
   - id: idol-marketing-agent
     repository: agent-runtime
     role: marketing-research
@@ -178,6 +219,36 @@ projects:
 
 
 types:
+  - id: external.track-reference.v1
+    media: yaml
+    schema: '{url, provider, track_id?, requested_at}'
+    provenance: required
+    owner_project: metadata-collection-agent
+
+  - id: metadata.track-metadata.v1
+    media: json
+    schema: '{provider, track_id, title, artists[], release_date?, duration_ms?, source_url, retrieved_at}'
+    provenance: required
+    owner_project: metadata-collection-agent
+
+  - id: audio.authorized-listening-notes.v1
+    media: markdown
+    schema: '{listener, authorization?, observed_at, notes[], evidence_scope}'
+    provenance: required
+    owner_project: song-analysis-agent
+
+  - id: playlist.observation.v1
+    media: json
+    schema: '{source, observed_at, ranking_status, track_match?, metrics?, limitations[]}'
+    provenance: required
+    owner_project: song-analysis-agent
+
+  - id: analysis.song-analysis.v1
+    media: json
+    schema: '{facts[], interpretations[], hypotheses[], limitations[], confidence, next_validation, citations[]}'
+    provenance: required
+    owner_project: song-analysis-agent
+
   - id: public.source-record.v1
     media: jsonl
     schema: '{source, source_url, title?, body?, accessed_at, retrieved_at, license?}'
@@ -232,7 +303,6 @@ types:
     provenance: required
     owner_project: idol-research
 
-  - id: editorial.format-spec.v1
   - id: marketing.question.v1
     media: yaml
     schema: '{market_question, target, geography?, period?, decision_needed}'
@@ -330,6 +400,24 @@ types:
     owner_project: podcast-generator
 
 transformations:
+  - id: track-reference-to-metadata
+    from: external.track-reference.v1
+    to: metadata.track-metadata.v1
+    owner_project: metadata-collection-agent
+    work: resolve public provider metadata, normalize fields, redact session values, attach provenance
+    skills: [metadata-extraction, provenance-capture]
+    tools: [spotify-public-metadata]
+    validation: metadata-completeness-and-secret-redaction
+
+  - id: metadata-and-observations-to-song-analysis
+    from: [metadata.track-metadata.v1, audio.authorized-listening-notes.v1, playlist.observation.v1, research.analysis-packet.v1]
+    to: analysis.song-analysis.v1
+    owner_project: song-analysis-agent
+    work: separate facts from interpretation, compare observations, state limits, define next validation
+    skills: [song-analysis, evidence-bounded-critique, uncertainty-labeling]
+    tools: [idol-db-ranker, idol-playlist-ranking, citation-checker]
+    validation: no-fabricated-claims-review
+
   - id: analysis-to-marketing-research
     from: [canonical.idol-record-set.v1, canonical.event-record-set.v1, research.analysis-packet.v1, marketing.question.v1]
     to: marketing.research-packet.v1

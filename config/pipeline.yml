@@ -5,6 +5,37 @@ purpose: >-
   podcast-generator に音声化を依頼する。
 
 stages:
+  - id: collect_track_metadata
+    owner: metadata-collection-agent
+    inputs:
+      - external_track_reference
+    outputs:
+      - metadata.track-metadata.v1
+    work:
+      skills: [metadata-extraction, provenance-capture]
+      tools: [spotify-public-metadata, gh]
+    rules:
+      - retain source_url and retrieved_at
+      - redact session credentials and personal data
+      - leave unavailable fields null rather than guessing
+
+  - id: analyze_song
+    owner: song-analysis-agent
+    inputs:
+      - metadata.track-metadata.v1
+      - audio.authorized-listening-notes.v1
+      - playlist.observation.v1
+      - research.analysis-packet.v1
+    outputs:
+      - analysis.song-analysis.v1
+    work:
+      skills: [song-analysis, evidence-bounded-critique, uncertainty-labeling]
+      tools: [idol-db-ranker, idol-playlist-ranking, citation-checker]
+    rules:
+      - separate facts, interpretations, hypotheses, and limitations
+      - do not fabricate audio, lyric, audience, or ranking claims
+      - define confidence and next_validation
+
   - id: select
     owner: idol-db
     inputs:

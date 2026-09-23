@@ -90,6 +90,15 @@ workflow engine / project execution
 
 この責務境界により、マーケティングエージェントは「何が起きているかを調べる人」、プロデューサーエージェントは「何をやるかを決め、実行可能な仕事へ変換する人」となります。詳細な型・変換・skill・toolは [`project.yaml`](project.yaml) を正とします。
 
+### Metadata and song analysis agents
+
+主題曲を扱う前段として、`metadata-collection-agent` が外部トラック参照を `metadata.track-metadata.v1` へ正規化し、`song-analysis-agent` がメタデータ、許可された聴取メモ、playlist観測を `analysis.song-analysis.v1` へ変換します。音源・歌詞・実測ランキングがない場合は分析を `partial` とし、音響的な印象や人気を推測しません。
+
+- [`metadata-collection-agent`](.github/agents/metadata-collection-agent.agent.md)
+- [`song-analysis-agent`](.github/agents/song-analysis-agent.agent.md)
+- 第1回のメタデータ出力: [`001-metadata.track-metadata.v1.json`](research/raw/001-metadata.track-metadata.v1.json)
+- 第1回の楽曲分析出力: [`001-analysis.song-analysis.v1.json`](research/raw/001-analysis.song-analysis.v1.json)
+
 入力は次のフィールドを持つことを前提にします。
 
 ```json

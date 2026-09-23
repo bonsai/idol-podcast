@@ -1,0 +1,30 @@
+{
+  "type": "metadata.track-metadata.v1",
+  "episode_id": "001",
+  "provider": "spotify",
+  "track_id": "4QTGIIFqhOOdwJeKca7okQ",
+  "title": "秘密の扉",
+  "artists": [
+    {
+      "name": "惑星通信社",
+      "artist_id": "6rVgYVJt4fd8sQ37GnFmEI"
+    }
+  ],
+  "release_date": "2025-07-20",
+  "duration_ms": 248000,
+  "source_url": "https://open.spotify.com/track/4QTGIIFqhOOdwJeKca7okQ",
+  "retrieved_at": "2026-09-23T18:20:00+09:00",
+  "provenance": {
+    "source_kind": "public_spotify_embed_metadata",
+    "raw_capture": "research/raw/spotify-track-4QTGIIFqhOOdwJeKca7okQ.metadata.txt",
+    "session_values_persisted": false
+  },
+  "missing": [
+    "album",
+    "genres",
+    "credits",
+    "lyrics",
+    "audio_features",
+    "official_artist_context"
+  ]
+}

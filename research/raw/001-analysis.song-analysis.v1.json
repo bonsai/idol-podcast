@@ -1,0 +1,56 @@
+{
+  "type": "analysis.song-analysis.v1",
+  "episode_id": "001",
+  "status": "partial",
+  "facts": [
+    {
+      "claim": "Spotify metadata identifies the track as 秘密の扉 by 惑星通信社.",
+      "source_ref": "research/raw/001-metadata.track-metadata.v1.json"
+    },
+    {
+      "claim": "The track was displayed with release date 2025-07-20 and duration 248 seconds.",
+      "source_ref": "research/raw/001-metadata.track-metadata.v1.json"
+    },
+    {
+      "claim": "The captured idol-playlist sample ranking did not contain a title, artist, or Spotify ID match.",
+      "source_ref": "research/raw/001-research-summary.md"
+    },
+    {
+      "claim": "The idol-playlist KPI documentation labels the current data sample_metrics=true and not an observed ranking.",
+      "source_ref": "research/raw/idol-playlist-KPI.yaml"
+    }
+  ],
+  "interpretations": [
+    {
+      "claim": "The current captured ranking cannot be used to score or evaluate this track.",
+      "confidence": "high",
+      "basis": "No matched row and the dataset is explicitly a sample."
+    }
+  ],
+  "hypotheses": [
+    {
+      "claim": "A missing ranking row may reflect catalog coverage rather than low popularity.",
+      "confidence": "low",
+      "next_validation": "Add source-backed observations from official artist material, events, or playlist activity."
+    }
+  ],
+  "limitations": [
+    "No authorized listening notes were supplied.",
+    "No lyrics or official artist context was analyzed.",
+    "No real observed weekly ranking was available for this track.",
+    "No audio feature or quality score was fabricated."
+  ],
+  "confidence": "medium",
+  "next_validation": [
+    "Collect authorized listening/performance notes.",
+    "Check official artist and release sources.",
+    "Create a provenance-preserving idol-db record if in scope.",
+    "Re-run ranking only after real observation data exists."
+  ],
+  "citations": [
+    "https://open.spotify.com/track/4QTGIIFqhOOdwJeKca7okQ",
+    "https://github.com/bonsai/idol-playlist",
+    "https://github.com/bonsai/idol-db",
+    "https://github.com/bonsai/idol-research"
+  ]
+}
