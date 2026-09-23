@@ -52,6 +52,8 @@ ip:performs a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:TypeTransform
 ip:usesSkill a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:Skill .
 ip:invokes a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Tool .
 ip:requiresSkill a rdfs:Property ; rdfs:domain ip:Task ; rdfs:range ip:Skill .
+ip:conformsTo a rdfs:Property ; rdfs:domain ip:Agent ; rdfs:range ip:Agent .
+ip:plannedBy a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:Agent .
 
 ip:IdolDb a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-db" .
 ip:IdolResearch a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-research" .
@@ -80,6 +82,9 @@ ip:ProducerAgent a ip:Agent ; rdfs:label "idol-producer-agent" ; ip:performs ip:
 ip:MarketingResearch a ip:TypeTransformation ; ip:transforms ip:MarketingResearchPacket .
 ip:PlanProject a ip:TypeTransformation ; ip:transforms ip:ProducerExecutionPlan .
 ip:DecomposePlan a ip:TypeTransformation ; ip:transforms ip:WorkflowTaskSet .
+ip:ProducerAgentArchitype a ip:Agent ; rdfs:label "bonsai/producer-agent architype" .
+ip:IdolPAgent a ip:Agent ; rdfs:label "bonsai/idol-p-agent practical type" ; ip:conformsTo ip:ProducerAgentArchitype .
+ip:IdolPodcastProject ip:plannedBy ip:IdolPAgent .
 ip:Canonicalize a ip:TypeTransformation ; ip:transforms ip:CanonicalRecordSet .
 ip:Analyze a ip:TypeTransformation ; ip:transforms ip:AnalysisPacket .
 ip:WriteCritique a ip:TypeTransformation ; ip:transforms ip:ApprovedScript .

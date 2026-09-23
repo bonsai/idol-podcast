@@ -249,6 +249,8 @@ boundary_rules:
     rule: marketing agent researches signals; producer agent chooses concept, plan, and execution decomposition
   - id: task-is-skill-and-tool-bound
     rule: every producer task declares at least one skill, one tool, an owner, inputs, outputs, and done condition
+  - id: architype-is-not-project
+    rule: an architype defines reusable producer semantics; a practical type applies them to a domain; a project owns concrete outputs
 
 instances:
   topology:
@@ -324,3 +326,16 @@ instances:
       - critique-brief-to-script
       - script-to-citation-manifest
       - approved-script-to-audio
+
+  producer_layers:
+    architype:
+      id: producer-agent
+      repository: bonsai/producer-agent
+    practical_type:
+      id: idol-p-agent
+      repository: bonsai/idol-p-agent
+      conforms_to: producer-agent
+    project:
+      id: idol-podcast
+      repository: bonsai/idol-podcast
+      planned_by: idol-p-agent

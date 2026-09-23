@@ -35,7 +35,7 @@ Podcast episode
 | `idol-db` | 公開情報の取得・正規化・出典管理 | canonical data、source URL、取得日時 |
 | `idol-research` | 観測、比較、仮説、評価、次の検証設計 | analysis packet |
 | `idol-marketing-agent` | researchを市場・対象・機会の調査へ変換 | marketing research packet |
-| [`idol-producer-agent`](https://github.com/bonsai/producer-agent) | marketing researchを企画・計画・workflow taskへ変換 | project concept、execution plan、task set |
+| [`idol-p-agent`](https://github.com/bonsai/idol-p-agent) | `producer-agent` architypeをアイドル領域で実務適用し、marketing researchを企画・計画・workflow taskへ変換 | project concept、execution plan、task set |
 | `idol-podcast` | 選抜論点の批評構成、言語化、出典・注意点の整理 | 台本、概要欄、引用一覧 |
 | `podcast-generator` | 承認済みテキストの音声化 | 音声、字幕、生成メタデータ |
 
