@@ -1,0 +1,292 @@
+version: 1
+kind: project-data-contract
+name: idol-critique-podcast
+purpose: >-
+  プロジェクトをデータ型変換の責務として定義する。
+  各プロジェクトは input type を受け取り、検証可能な output type を生成する。
+  repo間の受け渡しは r2r.yaml、実行順は config/pipeline.yml が参照する。
+
+conventions:
+  type_id_format: "domain.entity.version"
+  every_type_requires:
+    - type_id
+    - media
+    - schema
+    - provenance
+    - owner_project
+  every_transformation_requires:
+    - transformation_id
+    - from
+    - to
+    - work
+    - owner_project
+    - validation
+  immutable_boundaries:
+    - source_snapshots
+    - approved_editorial_text
+    - published_audio
+
+projects:
+  - id: idol-db
+    repository: bonsai/idol-db
+    role: canonical-data
+    purpose: 公開情報を取得・正規化し、再利用可能なcanonical dataへ変換する
+    inputs:
+      - public.source-record.v1
+      - public.event-record.v1
+    outputs:
+      - canonical.idol-record-set.v1
+      - canonical.event-record-set.v1
+      - provenance.source-manifest.v1
+    transformations:
+      - public-record-to-canonical-record
+      - event-record-to-normalized-event
+    acceptance:
+      - every_record_has_source_url
+      - retrieval_time_is_recorded
+      - license_or_usage_note_is_present
+      - private_content_is_excluded
+
+  - id: idol-research
+    repository: bonsai/idol-research
+    role: empirical-analysis
+    purpose: canonical dataを観測・比較・仮説化し、検証可能な分析へ変換する
+    inputs:
+      - canonical.idol-record-set.v1
+      - canonical.event-record-set.v1
+      - research.question.v1
+      - provenance.source-manifest.v1
+    outputs:
+      - research.observation-set.v1
+      - research.analysis-packet.v1
+      - research.evidence-selection.v1
+    transformations:
+      - canonical-data-to-observations
+      - observations-to-analysis
+      - analysis-to-evidence-selection
+    acceptance:
+      - fact_inference_hypothesis_are_separate
+      - comparison_context_is_recorded
+      - counter_hypothesis_is_present
+      - confidence_and_next_validation_are_present
+
+  - id: idol-podcast
+    repository: bonsai/idol-podcast
+    role: editorial-language
+    purpose: 選抜された分析を公共向けの批評・台本・出典へ変換する
+    inputs:
+      - research.evidence-selection.v1
+      - research.analysis-packet.v1
+      - provenance.source-manifest.v1
+      - editorial.format-spec.v1
+    outputs:
+      - editorial.episode-brief.v1
+      - editorial.approved-script.v1
+      - editorial.show-notes.v1
+      - editorial.citation-manifest.v1
+    transformations:
+      - analysis-to-critique-brief
+      - critique-brief-to-script
+      - script-to-citation-manifest
+    acceptance:
+      - central_question_is_explicit
+      - observed_facts_are_traceable
+      - interpretation_is_labeled
+      - uncertainty_is_disclosed
+      - human_editorial_review_is_recorded
+
+  - id: podcast-generator
+    repository: external-or-configured-adapter
+    role: audio-generation
+    purpose: 承認済みテキストを音声・字幕・生成記録へ変換する
+    inputs:
+      - editorial.approved-script.v1
+      - editorial.citation-manifest.v1
+      - audio.voice-config.v1
+    outputs:
+      - audio.podcast-episode.v1
+      - audio.transcript.vtt.v1
+      - audio.generation-manifest.v1
+    transformations:
+      - approved-script-to-audio
+    acceptance:
+      - input_script_hash_is_recorded
+      - voice_config_is_recorded
+      - generation_time_is_recorded
+      - source_text_is_retained
+
+
+types:
+  - id: public.source-record.v1
+    media: jsonl
+    schema: '{source, source_url, title?, body?, accessed_at, retrieved_at, license?}'
+    provenance: required
+    owner_project: idol-db
+
+  - id: public.event-record.v1
+    media: json
+    schema: '{date, title, artists[], venue?, area?, admission, free_status, source_url, fetched_at}'
+    provenance: required
+    owner_project: idol-db
+
+  - id: canonical.idol-record-set.v1
+    media: jsonl
+    schema: '{records[], entity_type, schema_version, generated_at, provenance_ref}'
+    provenance: required
+    owner_project: idol-db
+
+  - id: canonical.event-record-set.v1
+    media: jsonl
+    schema: '{events[], normalized_admission, normalized_conditions, generated_at, provenance_ref}'
+    provenance: required
+    owner_project: idol-db
+
+  - id: provenance.source-manifest.v1
+    media: json
+    schema: '{sources[{source, source_url, accessed_at, retrieved_at, license}], transformation_history[]}'
+    provenance: required
+    owner_project: idol-db
+
+  - id: research.question.v1
+    media: yaml
+    schema: '{question, scope, comparison_context?, proposed_metrics[]}'
+    provenance: optional
+    owner_project: idol-research
+
+  - id: research.observation-set.v1
+    media: json
+    schema: '{observations[{fact, measure?, unit?, observed_at, source_ref}], missing_data[], known_biases[]}'
+    provenance: required
+    owner_project: idol-research
+
+  - id: research.analysis-packet.v1
+    media: json
+    schema: '{facts[], inferences[], hypotheses[], counter_hypothesis, confidence, next_validation, citations[]}'
+    provenance: required
+    owner_project: idol-research
+
+  - id: research.evidence-selection.v1
+    media: json
+    schema: '{selected_facts[], selection_reason, excluded_facts[], missing_data[], known_biases[], citations[]}'
+    provenance: required
+    owner_project: idol-research
+
+  - id: editorial.format-spec.v1
+    media: yaml
+    schema: '{duration_target, sections[], tone, prohibited_content[]}'
+    provenance: optional
+    owner_project: idol-podcast
+
+  - id: editorial.episode-brief.v1
+    media: markdown
+    schema: 'title, central_question, thesis?, evidence_map, counter_hypothesis, next_validation'
+    provenance: required
+    owner_project: idol-podcast
+
+  - id: editorial.approved-script.v1
+    media: markdown
+    schema: 'opening, observed_facts, analysis, counter_hypothesis, proposals, closing, sources'
+    provenance: required
+    owner_project: idol-podcast
+
+  - id: editorial.show-notes.v1
+    media: markdown
+    schema: 'summary, chapters?, sources, limitations, disclosures'
+    provenance: required
+    owner_project: idol-podcast
+
+  - id: editorial.citation-manifest.v1
+    media: json
+    schema: '{citations[{claim, source_url, accessed_at, license}], script_sha256, reviewed_by, reviewed_at}'
+    provenance: required
+    owner_project: idol-podcast
+
+  - id: audio.voice-config.v1
+    media: json
+    schema: '{voices[], language, speaking_rate?, style?, consent_or_license?}'
+    provenance: optional
+    owner_project: podcast-generator
+
+  - id: audio.podcast-episode.v1
+    media: audio/mpeg
+    schema: 'binary audio plus generation-manifest reference'
+    provenance: required
+    owner_project: podcast-generator
+
+  - id: audio.transcript.vtt.v1
+    media: text/vtt
+    schema: 'WebVTT synchronized with audio.podcast-episode.v1'
+    provenance: required
+    owner_project: podcast-generator
+
+  - id: audio.generation-manifest.v1
+    media: json
+    schema: '{episode_id, script_sha256, generated_at, voice_config, duration_seconds, audio_sha256}'
+    provenance: required
+    owner_project: podcast-generator
+
+transformations:
+  - id: public-record-to-canonical-record
+    from: public.source-record.v1
+    to: canonical.idol-record-set.v1
+    owner_project: idol-db
+    work: identify, normalize, deduplicate, validate, attach provenance
+    preserves: [source_url, accessed_at, retrieved_at, license]
+    validation: schema-and-provenance-check
+
+  - id: event-record-to-normalized-event
+    from: public.event-record.v1
+    to: canonical.event-record-set.v1
+    owner_project: idol-db
+    work: normalize date, venue, area, price, free conditions, drink fee, reservation requirement
+    preserves: [source_url, fetched_at]
+    validation: event-schema-check
+
+  - id: canonical-data-to-observations
+    from: [canonical.idol-record-set.v1, canonical.event-record-set.v1, research.question.v1]
+    to: research.observation-set.v1
+    owner_project: idol-research
+    work: measure, compare, timestamp, record missingness and bias
+    validation: observation-schema-check
+
+  - id: observations-to-analysis
+    from: research.observation-set.v1
+    to: research.analysis-packet.v1
+    owner_project: idol-research
+    work: infer, hypothesize, counter-argue, assign confidence, define next validation
+    validation: fact-inference-hypothesis-review
+
+  - id: analysis-to-evidence-selection
+    from: research.analysis-packet.v1
+    to: research.evidence-selection.v1
+    owner_project: idol-research
+    work: select episode-worthy claims and traceable evidence
+    validation: citation-completeness-check
+
+  - id: analysis-to-critique-brief
+    from: [research.evidence-selection.v1, research.analysis-packet.v1, editorial.format-spec.v1]
+    to: editorial.episode-brief.v1
+    owner_project: idol-podcast
+    work: frame central question, sequence evidence, expose tension and counter-hypothesis
+    validation: editorial-brief-review
+
+  - id: critique-brief-to-script
+    from: editorial.episode-brief.v1
+    to: editorial.approved-script.v1
+    owner_project: idol-podcast
+    work: write spoken Japanese, mark fact versus interpretation, add sources and disclosures
+    validation: human-editorial-review
+
+  - id: script-to-citation-manifest
+    from: editorial.approved-script.v1
+    to: editorial.citation-manifest.v1
+    owner_project: idol-podcast
+    work: map material claims to source URLs and calculate script hash
+    validation: citation-and-hash-check
+
+  - id: approved-script-to-audio
+    from: [editorial.approved-script.v1, editorial.citation-manifest.v1, audio.voice-config.v1]
+    to: [audio.podcast-episode.v1, audio.transcript.vtt.v1, audio.generation-manifest.v1]
+    owner_project: podcast-generator
+    work: synthesize voice, synchronize transcript, record generation metadata
+    validation: audio-integrity-and-manifest-check

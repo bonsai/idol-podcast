@@ -33,7 +33,7 @@ Podcast episode
 
 ## 実行契約
 
-パイプラインの内部工程は [`config/pipeline.yml`](config/pipeline.yml)、リポジトリ間の受け渡し契約は [`r2r.yaml`](r2r.yaml)、批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
+パイプラインの内部工程は [`config/pipeline.yml`](config/pipeline.yml)、リポジトリ間の受け渡し契約は [`r2r.yaml`](r2r.yaml)、プロジェクト単位のデータ型と型変換の仕事は [`project.yaml`](project.yaml)、批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
 
 ## 4層オントロジー
 
@@ -47,6 +47,10 @@ Podcast episode
 | **AW** | なぜ作るか、何を達成し、どう分解するか | intent、outcome、user story、acceptance criteria、task、decision | runtime実行、データ保存、音声生成の詳細 |
 
 要約すると、**Topologyは地図、Workflowは実行列、R2Rはrepo間の契約、AWは意図から実装への設計図**です。Workflowがrepo境界を越えるときは必ずR2R契約を参照し、AWは承認済みのWorkflowと受入条件へ落とします。
+
+### Project = type transformation work
+
+プロジェクトは単なるrepo名ではなく、**入力データ型を出力データ型へ変換する仕事の所有単位**です。たとえば `idol-db` は `public.source-record.v1` を `canonical.idol-record-set.v1` に正規化し、`idol-research` はそれを `research.analysis-packet.v1` に分析し、`idol-podcast` は批評台本へ言語化します。型、変換、担当プロジェクト、検証条件を [`project.yaml`](project.yaml) で一緒に管理します。
 
 入力は次のフィールドを持つことを前提にします。
 

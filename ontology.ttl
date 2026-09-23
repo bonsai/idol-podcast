@@ -18,6 +18,9 @@ ip:Analysis a rdfs:Class .
 ip:EditorialText a rdfs:Class .
 ip:AudioEpisode a rdfs:Class .
 ip:Provenance a rdfs:Class .
+ip:Project a rdfs:Class ; rdfs:comment "入力型を出力型へ変換する責務単位"@ja .
+ip:DataType a rdfs:Class ; rdfs:comment "プロジェクト間を流れるversioned data contract"@ja .
+ip:TypeTransformation a rdfs:Class ; rdfs:comment "型変換として記録された具体的な仕事"@ja .
 
 ip:contains a rdfs:Property ; rdfs:domain ip:Topology ; rdfs:range ip:Node .
 ip:exposes a rdfs:Property ; rdfs:domain ip:Repository ; rdfs:range ip:Port .
@@ -35,6 +38,11 @@ ip:decomposesInto a rdfs:Property ; rdfs:domain ip:AWPlan ; rdfs:range ip:Workfl
 ip:uses a rdfs:Property ; rdfs:domain ip:Analysis ; rdfs:range ip:Observation .
 ip:cites a rdfs:Property ; rdfs:domain ip:EditorialText ; rdfs:range ip:Observation .
 ip:derivedFrom a rdfs:Property ; rdfs:domain ip:AudioEpisode ; rdfs:range ip:EditorialText .
+ip:owns a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:TypeTransformation .
+ip:accepts a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:DataType .
+ip:emits a rdfs:Property ; rdfs:domain ip:Project ; rdfs:range ip:DataType .
+ip:transforms a rdfs:Property ; rdfs:domain ip:TypeTransformation ; rdfs:range ip:DataType .
+ip:validatedBy a rdfs:Property ; rdfs:domain ip:TypeTransformation ; rdfs:range ip:Gate .
 
 ip:IdolDb a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-db" .
 ip:IdolResearch a ip:Repository, ip:Node ; rdfs:label "bonsai/idol-research" .
@@ -46,3 +54,15 @@ ip:IdolCritiqueWorkflow a ip:Workflow ; rdfs:label "idol-critique-podcast" .
 ip:IdolCritiqueR2R a ip:R2RContract ; ip:producer ip:IdolDb, ip:IdolResearch ; ip:consumer ip:IdolPodcast, ip:PodcastGenerator .
 ip:IdolPodcastAW a ip:AWPlan ; ip:realizes ip:IdolCritiqueIntent ; ip:decomposesInto ip:IdolCritiqueWorkflow .
 ip:IdolCritiqueIntent a ip:Intent ; rdfs:label "既存のidolデータと研究を、検証可能な公共の批評へ変換する"@ja .
+ip:IdolDbProject a ip:Project ; rdfs:label "idol-db project" ; ip:emits ip:CanonicalRecordSet .
+ip:IdolResearchProject a ip:Project ; rdfs:label "idol-research project" ; ip:accepts ip:CanonicalRecordSet ; ip:emits ip:AnalysisPacket .
+ip:IdolPodcastProject a ip:Project ; rdfs:label "idol-podcast project" ; ip:accepts ip:AnalysisPacket ; ip:emits ip:ApprovedScript .
+ip:PodcastGeneratorProject a ip:Project ; rdfs:label "podcast-generator project" ; ip:accepts ip:ApprovedScript ; ip:emits ip:AudioEpisode .
+ip:CanonicalRecordSet a ip:DataType ; rdfs:label "canonical.idol-record-set.v1" .
+ip:AnalysisPacket a ip:DataType ; rdfs:label "research.analysis-packet.v1" .
+ip:ApprovedScript a ip:DataType ; rdfs:label "editorial.approved-script.v1" .
+ip:AudioEpisodeType a ip:DataType ; rdfs:label "audio.podcast-episode.v1" .
+ip:Canonicalize a ip:TypeTransformation ; ip:transforms ip:CanonicalRecordSet .
+ip:Analyze a ip:TypeTransformation ; ip:transforms ip:AnalysisPacket .
+ip:WriteCritique a ip:TypeTransformation ; ip:transforms ip:ApprovedScript .
+ip:GenerateAudio a ip:TypeTransformation ; ip:transforms ip:AudioEpisodeType .

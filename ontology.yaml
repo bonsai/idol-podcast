@@ -70,6 +70,22 @@ layers:
       - audio_generation_details
     artifact: aw.yaml
 
+  project_data:
+    question: "各プロジェクトは何型を何型へ変換する仕事を持つか"
+    nature: typed-dataflow
+    owns:
+      - projects
+      - data_types
+      - input_types
+      - output_types
+      - type_transformations
+      - validation_contracts
+    does_not_own:
+      - global_execution_order
+      - repository_discovery
+      - editorial_approval_policy
+    artifact: project.yaml
+
 classes:
   Repository:
     description: source or delivery boundary that owns code, data, or artifacts
@@ -105,6 +121,12 @@ classes:
     description: human-reviewable critique brief, script, or show notes
   AudioEpisode:
     description: generated audio derived from an approved editorial text
+  Project:
+    description: unit of ownership responsible for one or more type transformations
+  DataType:
+    description: versioned shape and media contract flowing between projects
+  TypeTransformation:
+    description: named work that converts input data types into output data types
 
 relations:
   - subject: Repository
@@ -161,6 +183,21 @@ relations:
   - subject: AudioEpisode
     predicate: derived_from
     object: EditorialText
+  - subject: Project
+    predicate: owns
+    object: TypeTransformation
+  - subject: Project
+    predicate: accepts
+    object: DataType
+  - subject: Project
+    predicate: emits
+    object: DataType
+  - subject: TypeTransformation
+    predicate: transforms
+    object: DataType
+  - subject: TypeTransformation
+    predicate: validated_by
+    object: Gate
 
 boundary_rules:
   - id: topology-is-not-workflow
@@ -175,6 +212,12 @@ boundary_rules:
     rule: audio generation requires approved editorial text, citations, provenance, and uncertainty disclosure
   - id: private-boundary
     rule: private source content may inform authorized analysis but must not be copied into the public target repository
+  - id: project-is-type-owner
+    rule: every project declares input types, output types, and the transformations it owns
+  - id: transformation-is-work
+    rule: a type edge is not complete until its normalization, analysis, writing, or generation work is named
+  - id: typed-r2r
+    rule: every R2R artifact must reference a versioned DataType and a producing TypeTransformation
 
 instances:
   topology:
@@ -227,3 +270,21 @@ instances:
       - fact_inference_hypothesis_are_separate
       - human_review_precedes_audio
       - private_content_is_not_published
+
+  project_data:
+    id: idol-critique-podcast-project-data
+    project_file: project.yaml
+    projects:
+      - idol-db
+      - idol-research
+      - idol-podcast
+      - podcast-generator
+    transformations:
+      - public-record-to-canonical-record
+      - canonical-data-to-observations
+      - observations-to-analysis
+      - analysis-to-evidence-selection
+      - analysis-to-critique-brief
+      - critique-brief-to-script
+      - script-to-citation-manifest
+      - approved-script-to-audio
