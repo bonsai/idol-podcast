@@ -55,6 +55,8 @@ Podcast episode
 
 現段階では、既存のroot `project.yaml`、`ontology.yaml`、`ontology.ttl`を壊さずに互換維持します。`content/`と`work-system/`は新しい責務別の入口であり、同じデータや変換を別コピーとして管理しません。将来、Work System Layerを別プロジェクトへ移すときは、idol固有のSpotify・idol-db・批評プロンプトをadapterとして差し替えます。
 
+別リポジトリへの切り出し方針は [`work-system/EXTRACTION-PLAN.md`](work-system/EXTRACTION-PLAN.md) に定義します。まず実践型の`idol-podcast`で入力・出力・失敗・人間レビューを固定し、その後に汎用コア、ドメインadapter、プロジェクト内容へ分離します。
+
 ## 4層オントロジー
 
 似て見える4つを、対象の違いで分離します。正式な語彙とインスタンスは [`ontology.yaml`](ontology.yaml)、RDFとしての表現は [`ontology.ttl`](ontology.ttl) にあります。
