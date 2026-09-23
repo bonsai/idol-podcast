@@ -9,7 +9,7 @@ purpose: >-
 conventions:
   type_id_format: "domain.entity.version"
   every_type_requires:
-    - type_id
+    - id
     - media
     - schema
     - provenance

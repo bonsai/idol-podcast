@@ -52,6 +52,18 @@ Podcast episode
 
 プロジェクトは単なるrepo名ではなく、**入力データ型を出力データ型へ変換する仕事の所有単位**です。たとえば `idol-db` は `public.source-record.v1` を `canonical.idol-record-set.v1` に正規化し、`idol-research` はそれを `research.analysis-packet.v1` に分析し、`idol-podcast` は批評台本へ言語化します。型、変換、担当プロジェクト、検証条件を [`project.yaml`](project.yaml) で一緒に管理します。
 
+### Schemaとの違い
+
+**Schemaは「ある時点のデータがどんな形か」を定義するもの**です。一方、`project.yaml` はそのschemaを入力・出力として並べ、**時間の流れの中で、誰が、どんな仕事で、どの型へ変換し、何を検証するか**を定義します。
+
+```text
+Schema:        A型の形 ──────────────────────────────┐
+Project flow:  A型 ──[normalize]──> B型 ──[analyze]──> C型 ──[write]──> D型
+                         idol-db          idol-research       idol-podcast
+```
+
+したがって、schemaを各型の静的な契約、`project.yaml` を型変換の仕事と時間軸を持つ動的な契約として併用します。`r2r.yaml` はこの流れのうちrepo境界をまたぐ受け渡しだけを定義し、`config/pipeline.yml` は実行順とgateを定義します。
+
 入力は次のフィールドを持つことを前提にします。
 
 ```json
