@@ -1,0 +1,229 @@
+version: 1
+namespace: https://github.com/bonsai/idol-podcast/ontology#
+
+purpose: >-
+  idol ecosystem における topology、workflow、repository-to-repository (R2R)、
+  intent/architecture workflow (AW) の責務を分離し、相互変換可能な共通語彙を定義する。
+
+layers:
+  topology:
+    question: "何が存在し、何と接続できるか"
+    nature: static-structural
+    owns:
+      - nodes
+      - ports
+      - capabilities
+      - dependencies
+      - allowed_edges
+    does_not_own:
+      - execution_order
+      - runtime_state
+      - editorial_approval
+    artifact: topology.yaml
+
+  workflow:
+    question: "いつ、どの順序で、どの条件で実行するか"
+    nature: executable-process
+    owns:
+      - stages
+      - transitions
+      - triggers
+      - retries
+      - runtime_state
+      - gates
+    does_not_own:
+      - repository_ownership
+      - business_intent
+      - raw_data_schema
+    artifact: workflow.yaml
+
+  r2r:
+    question: "どのrepoが、どのartifactを、どの契約で受け渡すか"
+    nature: inter-repository-contract
+    owns:
+      - producer
+      - consumer
+      - artifact_contract
+      - provenance
+      - compatibility
+      - security_boundary
+    does_not_own:
+      - internal_step_order
+      - editorial_argument
+      - infrastructure_topology
+    artifact: r2r.yaml
+
+  aw:
+    question: "なぜ作るか、何を達成するか、意図をどう実装可能な作業へ分解するか"
+    nature: intent-to-delivery-decomposition
+    owns:
+      - intent
+      - outcomes
+      - actors
+      - user_stories
+      - acceptance_criteria
+      - tasks
+      - decision_records
+    does_not_own:
+      - canonical_data_storage
+      - runtime_execution
+      - audio_generation_details
+    artifact: aw.yaml
+
+classes:
+  Repository:
+    description: source or delivery boundary that owns code, data, or artifacts
+  Node:
+    description: topology participant such as repository, service, human, or external source
+  Port:
+    description: named input/output capability exposed by a node
+  Artifact:
+    description: versioned data, analysis, script, audio, or manifest
+  Capability:
+    description: operation a node can perform
+  Topology:
+    description: static graph of nodes, ports, capabilities, and allowed connections
+  Workflow:
+    description: executable graph of stages and state transitions
+  WorkflowStep:
+    description: one executable unit inside a workflow
+  Gate:
+    description: condition that must be satisfied before transition
+  R2RContract:
+    description: producer-consumer contract spanning repository boundaries
+  Provenance:
+    description: source, access, retrieval, license, and transformation metadata
+  Intent:
+    description: desired value or problem statement
+  AWPlan:
+    description: decomposition from intent to outcomes, stories, criteria, and tasks
+  Observation:
+    description: recorded fact with provenance and observation time
+  Analysis:
+    description: comparison, inference, hypothesis, or evaluation over observations
+  EditorialText:
+    description: human-reviewable critique brief, script, or show notes
+  AudioEpisode:
+    description: generated audio derived from an approved editorial text
+
+relations:
+  - subject: Repository
+    predicate: exposes
+    object: Port
+  - subject: Port
+    predicate: supports
+    object: Capability
+  - subject: Topology
+    predicate: contains
+    object: Node
+  - subject: Topology
+    predicate: allows
+    object: Port
+  - subject: Workflow
+    predicate: executes
+    object: WorkflowStep
+  - subject: WorkflowStep
+    predicate: consumes
+    object: Artifact
+  - subject: WorkflowStep
+    predicate: produces
+    object: Artifact
+  - subject: WorkflowStep
+    predicate: guarded_by
+    object: Gate
+  - subject: R2RContract
+    predicate: producer
+    object: Repository
+  - subject: R2RContract
+    predicate: consumer
+    object: Repository
+  - subject: R2RContract
+    predicate: exchanges
+    object: Artifact
+  - subject: Artifact
+    predicate: has_provenance
+    object: Provenance
+  - subject: AWPlan
+    predicate: realizes
+    object: Intent
+  - subject: AWPlan
+    predicate: decomposes_into
+    object: Workflow
+  - subject: AWPlan
+    predicate: defines
+    object: Gate
+  - subject: Analysis
+    predicate: uses
+    object: Observation
+  - subject: EditorialText
+    predicate: cites
+    object: Observation
+  - subject: AudioEpisode
+    predicate: derived_from
+    object: EditorialText
+
+boundary_rules:
+  - id: topology-is-not-workflow
+    rule: topology may say an edge is possible; workflow says when and under what state it runs
+  - id: r2r-is-not-topology
+    rule: r2r defines a durable artifact contract across repos; topology defines the broader graph of possible connections
+  - id: aw-is-not-execution
+    rule: aw captures intent, acceptance, and decomposition; workflow performs the approved plan
+  - id: workflow-must-honor-r2r
+    rule: a workflow step crossing repositories must reference an R2R contract
+  - id: public-podcast-gate
+    rule: audio generation requires approved editorial text, citations, provenance, and uncertainty disclosure
+  - id: private-boundary
+    rule: private source content may inform authorized analysis but must not be copied into the public target repository
+
+instances:
+  topology:
+    id: idol-ecosystem-topology
+    nodes:
+      - idol-db
+      - idol-research
+      - idol-podcast
+      - podcast-generator
+      - human-editor
+      - public-data-sources
+    edges:
+      - [public-data-sources, idol-db]
+      - [idol-db, idol-research]
+      - [idol-db, idol-podcast]
+      - [idol-research, idol-podcast]
+      - [idol-podcast, human-editor]
+      - [idol-podcast, podcast-generator]
+
+  r2r:
+    id: idol-critique-podcast-r2r
+    contract_file: r2r.yaml
+    exchanges:
+      - selected_evidence.json
+      - analysis_packet.json
+      - episode-script.md
+      - citations.json
+      - episode.mp3
+
+  workflow:
+    id: idol-critique-podcast
+    workflow_file: config/pipeline.yml
+    steps:
+      - select-evidence
+      - attach-analysis
+      - write-critique
+      - human-editorial-review
+      - generate-audio
+
+  aw:
+    id: idol-podcast-aw
+    intent: "既存のidolデータと研究を、検証可能な公共の批評へ変換する"
+    outcomes:
+      - evidence-backed-episode
+      - traceable-citations
+      - explicit-counter-hypothesis
+      - reviewable-audio
+    acceptance_criteria:
+      - every_material_fact_has_source
+      - fact_inference_hypothesis_are_separate
+      - human_review_precedes_audio
+      - private_content_is_not_published

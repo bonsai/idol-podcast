@@ -35,6 +35,19 @@ Podcast episode
 
 パイプラインの内部工程は [`config/pipeline.yml`](config/pipeline.yml)、リポジトリ間の受け渡し契約は [`r2r.yaml`](r2r.yaml)、批評テキストの編集規約は [`prompts/critique-script.md`](prompts/critique-script.md) にあります。
 
+## 4層オントロジー
+
+似て見える4つを、対象の違いで分離します。正式な語彙とインスタンスは [`ontology.yaml`](ontology.yaml)、RDFとしての表現は [`ontology.ttl`](ontology.ttl) にあります。
+
+| 概念 | 問い | 管理するもの | 管理しないもの |
+|---|---|---|---|
+| **Topology** | 何が存在し、何と接続できるか | node、port、capability、依存関係、許可されたedge | 実行順、実行状態、編集承認 |
+| **Workflow** | いつ、どの順序・条件で実行するか | stage、transition、trigger、retry、runtime state、gate | repo所有権、事業意図、canonical schema |
+| **R2R** | repo間で何をどの契約で渡すか | producer、consumer、artifact、provenance、互換性、境界 | 内部の手順順序、批評の論旨、全体トポロジー |
+| **AW** | なぜ作るか、何を達成し、どう分解するか | intent、outcome、user story、acceptance criteria、task、decision | runtime実行、データ保存、音声生成の詳細 |
+
+要約すると、**Topologyは地図、Workflowは実行列、R2Rはrepo間の契約、AWは意図から実装への設計図**です。Workflowがrepo境界を越えるときは必ずR2R契約を参照し、AWは承認済みのWorkflowと受入条件へ落とします。
+
 入力は次のフィールドを持つことを前提にします。
 
 ```json
